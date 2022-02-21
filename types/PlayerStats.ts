@@ -1,21 +1,20 @@
-import { Timestamp } from "firebase/firestore";
-
 interface PlayerStats {
-  name: string;
-  agency?: string;
+  player_name: string;
+  player_agency?: string;
+  player_class?: "assault" | "medic" | "recon" | "robo";
   kills: number;
   absorbed: number;
   healing: number;
   damage: number;
-  objPts: number;
+  obj_pts: number;
   buffs: number;
   defense: number;
-  botKills: number;
+  bot_kills: number;
   deaths: number;
   assists: number;
-  timestamp: Date | Timestamp | string;
-  gameId?: string;
-  class?: "assault" | "medic" | "recon" | "robo";
+  timestamp: string;
+  match_id?: string;
+  match_type: "challnge" | "mercenary" | "ava";
 }
 
 export default PlayerStats;

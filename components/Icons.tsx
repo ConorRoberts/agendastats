@@ -10,7 +10,12 @@ export {
   AiOutlinePlusCircle as Plus,
   AiOutlineMinusCircle as Minus
 } from "react-icons/ai";
-export { GiHamburgerMenu as Menu } from "react-icons/gi";
+export {
+  GiHamburgerMenu as Menu,
+  GiHealthNormal as Medic,
+  GiMineExplosion as Assault,
+  GiCrosshair as Recon
+} from "react-icons/gi";
 export {
   MdLogin as Login,
   MdLogout as Logout,
@@ -28,5 +33,6 @@ export { FcGoogle as Google } from "react-icons/fc";
 export { GrImage as Image } from "react-icons/gr";
 export {
   BsArrowUpCircle as ArrowUp,
-  BsArrowDownCircle as ArrowDown
+  BsArrowDownCircle as ArrowDown,
+  BsGearFill as Robotics
 } from "react-icons/bs";

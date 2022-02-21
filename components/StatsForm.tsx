@@ -1,4 +1,4 @@
-import { Button, TextArea } from "@components/form";
+import { Button, TextArea, Select } from "@components/form";
 import axios from "axios";
 import { FormEvent, useState } from "react";
 import { Minus, Plus } from "./Icons";
@@ -11,16 +11,21 @@ const StatsForm = () => {
     recon: 0,
     robo: 0
   });
-  const [submitLoading,setSubmitLoading] = useState(false);
+  const [matchType, setMatchType] = useState("challenge");
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setSubmitLoading(true);
 
-    await axios.post("/api/get-player-stats", {
-      classCounts: Object.entries(counts),
-      text
-    });
+    try {
+      await axios.post("/api/player-stats", {
+        classCounts: Object.entries(counts),
+        text
+      });
+    } catch (error) {
+      console.error(error);
+    }
 
     setSubmitLoading(false);
     setText("");
@@ -39,7 +44,16 @@ const StatsForm = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <TextArea onChange={(e) => setText(e.target.value)} placeholder="Stats" />
+      <TextArea
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Stats"
+        value={text}
+      />
+      <Select onChange={(e) => setMatchType(e.target.value)} value={matchType}>
+        {["challenge", "mercenary", "ava"].map((e) => (
+          <option key={e}>{e}</option>
+        ))}
+      </Select>
       {Object.entries(counts).map(([label, value]) => (
         <div key={label} className="grid grid-cols-2 my-2">
           <p className="capitalize">{label}</p>

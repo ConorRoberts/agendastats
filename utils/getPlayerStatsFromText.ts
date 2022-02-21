@@ -60,7 +60,7 @@ const getPlayerStatsFromText = (
         ...Object.fromEntries(
           current.map((e, i) => [i === 12 ? "Class" : text[i], e])
         ),
-        timestamp: new Date()
+        timestamp: new Date().toLocaleDateString()
       } as PlayerStats;
 
       result.push(obj);
@@ -75,19 +75,19 @@ const getPlayerStatsFromText = (
 
 const fixKeys = (obj: object): PlayerStats => {
   const translate = {
-    "Class/Level/Name": "name",
-    Agency: "agency",
+    "Class/Level/Name": "player_name",
+    Agency: "player_agency",
     Kills: "kills",
     Absorbed: "absorbed",
     Heal: "healing",
     Dmg: "damage",
     Deaths: "deaths",
-    "Obj. Pts": "objPts",
+    "Obj. Pts": "obj_pts",
     Assists: "assists",
     Buffs: "buffs",
     Defense: "defense",
-    "Bot Kills": "botKills",
-    Class: "class"
+    "Bot Kills": "bot_kills",
+    Class: "player_class"
   };
 
   return Object.fromEntries(
