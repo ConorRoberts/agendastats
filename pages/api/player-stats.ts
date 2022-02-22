@@ -15,7 +15,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       await client.connect();
       const matchId = randomUUID();
       await client.query(
-        `insert into stats (match_id,match_type,player_name,player_agency,player_class,kills,bot_kills,damage,absorbed,deaths,healing,assists,buffs,obj_pts,defense,timestamp) values ${data
+        `insert into stats (match_id,player_name,player_agency,player_class,kills,bot_kills,damage,absorbed,deaths,healing,assists,buffs,obj_pts,defense,timestamp) values ${data
           .map(
             (e) =>
               `('${matchId}','${matchType}','${e.player_name}','${
@@ -27,6 +27,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               },'${new Date(e.timestamp).toLocaleDateString()}')`
           )
           .join(",")}`
+      );
+
+      await client.query(
+        "insert into match(match_id,match_type) values($1,$2)",
+        [matchId, matchType]
       );
 
       await client.end();

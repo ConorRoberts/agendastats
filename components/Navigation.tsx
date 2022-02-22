@@ -20,7 +20,7 @@ const Navigation = () => {
     <div>
       {showStatsForm && (
         <Modal onClose={() => setShowStatsForm(false)}>
-          <div className="w-screen max-w-lg">
+          <div className="w-screen max-w-4xl">
             <h2 className="font-light text-center mb-4">New Entry</h2>
             <StatsForm />
           </div>
@@ -75,6 +75,11 @@ const Navigation = () => {
         <Link href="/" passHref>
           <div className="big-screen-nav-button">
             <p>Home</p>
+          </div>
+        </Link>
+        <Link href="/games" passHref>
+          <div className="big-screen-nav-button">
+            <p>Games</p>
           </div>
         </Link>
 

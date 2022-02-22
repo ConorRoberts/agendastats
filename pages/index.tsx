@@ -1,8 +1,9 @@
+import { Input } from "@components/form";
 import { Assault, Medic, Recon, Robotics } from "@components/Icons";
 import PlayerStats from "@typedefs/PlayerStats";
 import getPgClient from "@utils/getPgClient";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const headers = [
   "Date",
@@ -23,12 +24,8 @@ const icons = {
   recon: <Recon className="w-6 h-6" />
 };
 
-const Page = ({ stats, averages, singleMatchRecords, players }) => {
-  // useEffect(() => {
-  //   console.log(singleMatchRecords);
-  //   console.log(players);
-  // }, []);
-
+const Page = ({ averages, singleMatchRecords, players }) => {
+  const [playerQuery, setPlayerQuery] = useState("");
   return (
     <div className="flex flex-col gap-8 p-2 mx-auto max-w-5xl">
       <div className="flex flex-col gap-4">
@@ -41,7 +38,7 @@ const Page = ({ stats, averages, singleMatchRecords, players }) => {
                 {data.map(({ player_name, player_class, value }) => (
                   <div
                     key={label + player_name}
-                    className="shadow-md capitalize rounded-xl p-2 border border-gray-200 grid grid-cols-2"
+                    className="capitalize rounded-md p-2 border border-gray-300 grid grid-cols-2"
                   >
                     <div className="flex gap-4 items-center">
                       {icons[player_class]}
@@ -62,7 +59,7 @@ const Page = ({ stats, averages, singleMatchRecords, players }) => {
                 {data.map(({ player_name, player_class, value }) => (
                   <div
                     key={label + player_name}
-                    className="shadow-md capitalize rounded-xl p-2 border border-gray-200 grid grid-cols-2"
+                    className="rounded-md p-2 border border-gray-300 capitalize grid grid-cols-2"
                   >
                     <div className="flex gap-4 items-center">
                       {icons[player_class]}
@@ -80,44 +77,27 @@ const Page = ({ stats, averages, singleMatchRecords, players }) => {
       </div>
       <div className="flex flex-col gap-4">
         <h2 className="text-center">Players</h2>
-        <div className="flex gap-4 flex-wrap">
-          {players.map((player: string) => (
-            <Link key={player} href={`/player/${player}`}>
-              <div className="py-1 px-4 rounded-full primary-hover hover:shadow-xl border border-gray-300">
-                {player}
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-      <div className="flex flex-col gap-4">
-        <h3 className="text-center">History</h3>
-        <div>
-          <div className="rounded-md grid grid-cols-9">
-            {headers.map((e) => (
-              <p key={e} className="font-semibold">
-                {e}
-              </p>
+        <Input
+          placeholder="Search"
+          value={playerQuery}
+          onChange={(e) => setPlayerQuery(e.target.value)}
+        />
+        <div className="flex-col rounded-xl border border-gray-200 divide-y bg-white">
+          {players
+            .filter((e: string) =>
+              e.toLowerCase().includes(playerQuery.toLowerCase())
+            )
+            .map((player: string) => (
+              <Link key={player} href={`/player/${player}`}>
+                <div
+                  className={`py-1 px-4 background-hover ${
+                    player.length > 8 && "col-span-2"
+                  }`}
+                >
+                  {player}
+                </div>
+              </Link>
             ))}
-          </div>
-          {stats.map((e: PlayerStats, index) => (
-            <div
-              key={e.match_id + e.player_name}
-              className={`grid grid-cols-9 capitalize py-0.5 ${
-                index % 2 === 0 ? "bg-blue-100" : "bg-white"
-              }`}
-            >
-              <p>{new Date(e.timestamp).toLocaleDateString()}</p>
-              <p>{e.player_class}</p>
-              <p>{e.player_name}</p>
-              <p>{e.kills}</p>
-              <p>{e.damage}</p>
-              <p>{e.healing}</p>
-              <p>{e.assists}</p>
-              <p>{e.deaths}</p>
-              <p>{e.bot_kills}</p>
-            </div>
-          ))}
         </div>
       </div>
     </div>
@@ -127,7 +107,6 @@ const Page = ({ stats, averages, singleMatchRecords, players }) => {
 export const getServerSideProps = async () => {
   const client = getPgClient();
   await client.connect();
-  const query = await client.query("select * from stats");
   const highestAverageDmg = await client.query(
     "select player_name,player_class,avg(damage) as value from stats group by player_name,player_class order by avg(damage) desc limit 3"
   );
@@ -147,10 +126,6 @@ export const getServerSideProps = async () => {
 
   return {
     props: {
-      stats: query.rows.map((e) => ({
-        ...e,
-        timestamp: new Date(e.timestamp).toJSON()
-      })),
       players: players.rows.map((e) => e.player_name),
       averages: [
         [

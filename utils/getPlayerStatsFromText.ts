@@ -6,71 +6,79 @@ const getPlayerStatsFromText = (
   str: string,
   classes: ClassCounts
 ): PlayerStats[] => {
-  const text = str
-    .split("\n")
-    .filter((line) => line.length >= 1)
-    .map((e) => e.replace("\r", "").trim());
+  try {
+    const text = str
+      .split("\n")
+      .filter((line) => line.length >= 1)
+      .map((e) => e.replace("\r", "").trim());
 
-  let col = 0,
-    classCount = 0,
-    classIdx = 0;
-  let data = `${text.slice(0, 12).join(",")},Class\n`;
-  const result: PlayerStats[] = [];
-  let current: (string | number)[] = [];
+    let col = 0,
+      classCount = 0,
+      classIdx = 0;
+    let data = `${text.slice(0, 12).join(",")},Class\n`;
+    const result: PlayerStats[] = [];
+    let current: (string | number)[] = [];
 
-  text.slice(12).forEach((line) => {
-    if (col < 2) {
-      // Check for missing agency
-      if (col === 1 && !isNaN(parseInt(line))) {
-        // console.log(parseInt(line));
-        current.push("");
-        col++;
-        current.push(parseInt(line));
-      } else {
-        current.push(line.replace(/[0-9+]+ | +|\W/g, ""));
-      }
-      col++;
-    } else {
-      if (/[0-9]+ +[0-9]+/g.test(line)) {
-        line.split(" ").forEach((e) => {
+    text.slice(12).forEach((line) => {
+      if (col < 2) {
+        // Check for missing agency
+        if (col === 1 && !isNaN(parseInt(line))) {
+          // console.log(parseInt(line));
+          current.push("");
           col++;
-          current.push(parseInt(e));
-        });
-      } else {
-        current.push(parseInt(line));
+          current.push(parseInt(line));
+        } else {
+          current.push(line.replace(/[0-9+]+ | +|\W/g, "").toLowerCase());
+        }
         col++;
-      }
-    }
-
-    if (col === 12) {
-      const [name, num] = classes[classIdx];
-
-      if (classCount < num * 2) {
-        current.push(name);
-      }
-
-      classCount++;
-
-      if (classCount === num * 2) {
-        classCount = 0;
-        classIdx++;
+      } else {
+        if (/[0-9]+ +[0-9]+/g.test(line)) {
+          line.split(" ").forEach((e) => {
+            col++;
+            current.push(parseInt(e));
+          });
+        } else {
+          current.push(parseInt(line));
+          col++;
+        }
       }
 
-      const obj = {
-        ...Object.fromEntries(
-          current.map((e, i) => [i === 12 ? "Class" : text[i], e])
-        ),
-        timestamp: new Date().toLocaleDateString()
-      } as PlayerStats;
+      if (col === 12) {
+        if (classIdx>=(classes.length)){
+          return;
+        }
+        
+        const [name, num] = classes[classIdx];
 
-      result.push(obj);
-      data = data + `${current.join(",")}\n`;
-      current = [];
-      col = 0;
-    }
-  });
+        if (classCount < num * 2) {
+          current.push(name);
+        }
 
-  return result.map((e) => fixKeys(e));
+        classCount++;
+
+        if (classCount === num * 2) {
+          classCount = 0;
+          classIdx++;
+        }
+        const obj = {
+          ...Object.fromEntries(
+            current.map((e, i) => [i === 12 ? "Class" : text[i], e])
+          ),
+          timestamp: new Date().toLocaleDateString()
+        } as PlayerStats;
+
+        result.push(obj);
+        data = data + `${current.join(",")}\n`;
+        current = [];
+        col = 0;
+      }
+    });
+
+    return result.map((e) => fixKeys(e));
+  } catch (error) {
+    console.log(error);
+    throw new Error(error);
+  }
 };
 
 const fixKeys = (obj: object): PlayerStats => {
