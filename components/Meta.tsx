@@ -1,14 +1,13 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import Head from "next/head";
 import { APP_NAME } from "@config/config";
 
 export interface HeaderProps {
-    title: string;
-    children?: any;
+  title: string;
+  children?: ReactNode;
 }
 
 const Meta = ({ title, ...props }: HeaderProps) => {
-
   // const colour = darkMode ? '#000000' : '#ffffff';
 
   return (

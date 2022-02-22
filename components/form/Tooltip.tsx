@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 
-const Tooltip = (props: any) => {
+export interface TooltipProps {
+  text: string;
+}
+
+const Tooltip = ({ text }: TooltipProps) => {
   const [visible, setVisible] = useState(false);
   return (
     <div
@@ -11,7 +15,7 @@ const Tooltip = (props: any) => {
       {/* <TooltipIcon /> */}
       {visible && (
         <div className="absolute top-0 right-0 p-2 rounded-md bg-gray-800 text-gray-100 bg-opacity-95 border border-gray-600 w-48 font-medium shadow-md z-10">
-          {props.text}
+          {text}
         </div>
       )}
     </div>

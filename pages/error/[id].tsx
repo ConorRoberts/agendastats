@@ -1,9 +1,9 @@
 import React from "react";
 
 const Page = () => {
-    return (
-        <div>Error</div>
-    );
+  return (
+    <div>Error</div>
+  );
 };
 
 export default Page;

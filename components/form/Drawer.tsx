@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import { motion, useAnimation } from "framer-motion";
 import Portal from "./Portal";
+import { ReactNode } from "react";
 
 export interface DrawerProps {
-  children: any;
+  children: ReactNode;
   onClose: () => void;
 }
 
@@ -25,7 +26,7 @@ const ResponsiveDrawer = ({
   onClose,
   position
 }: ResponsiveDrawerProps) => {
-  const ref: any = useRef();
+  const ref = useRef(null);
   const controls = useAnimation();
   const startPos = position === "left" ? "-100%" : "100%";
   const endPos = position === "left" ? "0%" : "0%";
@@ -42,7 +43,7 @@ const ResponsiveDrawer = ({
     };
   }, [controls, endPos]);
 
-  const handleEvent = async (e: any) => {
+  const handleEvent = async (e) => {
     if (ref?.current && !ref?.current?.contains(e.target)) {
       await controls.start({ translateX: startPos });
       onClose();

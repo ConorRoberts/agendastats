@@ -1,7 +1,7 @@
 import { Button, TextArea, Select } from "@components/form";
 import getPlayerStatsFromText from "@utils/getPlayerStatsFromText";
 import axios from "axios";
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Loading, Minus, Plus } from "./Icons";
 
 const StatsForm = () => {
@@ -108,7 +108,9 @@ const StatsForm = () => {
         <Button type="submit" onClick={handleSubmit}>
           Submit
         </Button>
-        {submitLoading && <Loading className="w-5 h-5 text-gray-500 animate-spin"/>}
+        {submitLoading && (
+          <Loading className="w-5 h-5 text-gray-500 animate-spin" />
+        )}
       </div>
     </div>
   );

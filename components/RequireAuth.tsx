@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import LoadingScreen from "@components/LoadingScreen";
 import { getDoc, doc, getFirestore } from "@firebase/firestore";
 import useAuth from "hooks/useAuth";
 
 export interface RequireAuthProps {
-  children: any;
+  children: ReactNode;
   allowRoles?: string[];
 }
 
