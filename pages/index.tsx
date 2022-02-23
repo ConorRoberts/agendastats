@@ -1,5 +1,6 @@
 import { Button, Input, Select } from "@components/form";
 import { Assault, Medic, Recon, Robotics } from "@components/Icons";
+import { MIN_GAMES_PLAYED } from "@config/config";
 import PlayerStats from "@typedefs/PlayerStats";
 import getPgClient from "@utils/getPgClient";
 import Link from "next/link";
@@ -15,6 +16,7 @@ const icons = {
 const Page = ({ averages, players, topPlayers, contributionScores }) => {
   const [playerQuery, setPlayerQuery] = useState("");
   const [contributorField, setContributorField] = useState("damage");
+  const [contributorClass, setContributorClass] = useState("all");
   return (
     <div className="flex flex-col gap-8 p-2 mx-auto max-w-5xl w-full">
       <div className="flex flex-col gap-4">
@@ -31,8 +33,11 @@ const Page = ({ averages, players, topPlayers, contributionScores }) => {
             </div>
           ))}
         </div>
-        <h2>Highest Contributors</h2>
-        <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+        <div>
+          <h2>Highest Contributors</h2>
+          <p>Min. {MIN_GAMES_PLAYED} games. All modes.</p>
+        </div>
+        <div className="flex flex-col gap-4">
           <div className="flex-1">
             <h4 className="capitalize">{contributorField}</h4>
             <p>
@@ -40,23 +45,51 @@ const Page = ({ averages, players, topPlayers, contributionScores }) => {
               match (across all matches)
             </p>
           </div>
-          <div className="flex capitalize gap-4">
-            {["damage", "healing", "kills"].map((e) => (
-              <div
-                onClick={() => setContributorField(e)}
-                key={`contrib-option-${e}`}
-                className={`rounded-full border-gray-300 border py-1 px-3 ${
-                  contributorField === e && "bg-indigo-500 text-white text-center"
-                }`}
-              >
-                {e}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="rounded-xl border border-gray-300 p-2">
+              <h4 className="text-center mb-2">Stat</h4>
+              <div className="flex capitalize gap-4">
+                {["damage", "healing", "kills"].map((e) => (
+                  <div
+                    onClick={() => setContributorField(e)}
+                    key={`contrib-option-${e}`}
+                    className={`rounded-full border-gray-300 border py-1 px-3 ${
+                      contributorField === e &&
+                      "bg-indigo-500 text-white text-center"
+                    }`}
+                  >
+                    {e}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="rounded-xl border border-gray-300 p-2">
+              <h4 className="text-center mb-2">Class</h4>
+              <div className="flex capitalize gap-2 flex-col sm:flex-row">
+                {["all", "assault", "medic", "recon", "robo"].map((e) => (
+                  <div
+                    onClick={() => setContributorClass(e)}
+                    key={`contrib-class-${e}`}
+                    className={`rounded-full border-gray-300 border py-1 px-3 sm:text-center ${
+                      contributorClass === e &&
+                      "bg-indigo-500 text-white"
+                    }`}
+                  >
+                    {e}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
         <div className="flex flex-col gap-0.5 capitalize">
           {contributionScores
             .sort((a, b) => b[contributorField] - a[contributorField])
+            .filter((e: PlayerStats) =>
+              contributorClass === "all"
+                ? true
+                : e.player_class === contributorClass
+            )
             .slice(0, 10)
             .map((player: PlayerStats) => (
               <div
@@ -196,7 +229,7 @@ export const getServerSideProps = async () => {
               f.player_class === e.player_class
           ).games_played
         }))
-        .filter((e) => e.games_played >= 5)
+        .filter((e) => e.games_played >= MIN_GAMES_PLAYED)
     }
   };
 };
