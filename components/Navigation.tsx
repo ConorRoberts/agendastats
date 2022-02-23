@@ -5,12 +5,14 @@ import { Home, Menu, Login, Logout } from "@components/Icons";
 import useAuth from "hooks/useAuth";
 import { useRouter } from "next/router";
 import StatsForm from "./StatsForm";
+import useRole from "@hooks/useRole";
 
 const Navigation = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showStatsForm, setShowStatsForm] = useState(false);
   const [auth] = useAuth();
   const router = useRouter();
+  const [role, roleLoading] = useRole();
 
   useEffect(() => {
     setMenuOpen(false);
@@ -77,15 +79,17 @@ const Navigation = () => {
             <p>Home</p>
           </div>
         </Link>
-        <Link href="/games" passHref>
+        {/* <Link href="/games" passHref>
           <div className="big-screen-nav-button">
             <p>Games</p>
           </div>
-        </Link>
+        </Link> */}
 
-        <div className="ml-auto">
-          <Button onClick={() => setShowStatsForm(true)}>New Entry</Button>
-        </div>
+        {role === "admin" && (
+          <div className="ml-auto">
+            <Button onClick={() => setShowStatsForm(true)}>New Entry</Button>
+          </div>
+        )}
       </div>
     </div>
   );

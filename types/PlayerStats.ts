@@ -14,7 +14,6 @@ interface PlayerStats {
   assists: number;
   timestamp: string;
   match_id?: string;
-  match_type: "challnge" | "mercenary" | "ava";
 }
 
 export default PlayerStats;

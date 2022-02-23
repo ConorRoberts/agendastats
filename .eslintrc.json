@@ -13,7 +13,7 @@
   "rules": {
     "indent": ["error", 2, { "SwitchCase": 1 }],
     "linebreak-style": ["warn", "windows"],
-    "quotes": ["error", "double"],
+    "quotes": ["error", "double", { "allowTemplateLiterals": true }],
     "semi": ["error", "always"],
     "prefer-const": "error",
     "require-await": "warn",
@@ -22,10 +22,7 @@
     "no-nested-ternary": "error",
     "arrow-parens": "warn",
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "warn",
-      { "varsIgnorePattern": "_" }
-    ],
+    "@typescript-eslint/no-unused-vars": ["warn", { "varsIgnorePattern": "_" }],
     "prefer-arrow/prefer-arrow-functions": [
       "warn",
       {

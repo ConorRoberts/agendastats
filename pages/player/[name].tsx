@@ -1,7 +1,9 @@
 import { Assault, Medic, Recon, Robotics } from "@components/Icons";
+import PlayerStats from "@typedefs/PlayerStats";
 import getPgClient from "@utils/getPgClient";
 import { NextPageContext } from "next";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 const icons = {
   robo: <Robotics className="w-5 h-5" />,
@@ -10,24 +12,24 @@ const icons = {
   recon: <Recon className="w-5 h-5" />
 };
 
-const Page = ({ averages, records, globalAverages }) => {
-  const router = useRouter();
-  const { name } = router.query;
-
+const Page = ({ records, name, gamesPlayed, playerAvg }) => {
   return (
     <div>
-      <div className="bg-white rounded-xl p-3 shadow-md mx-auto w-full max-w-3xl flex flex-col gap-4">
-        <h2>{name}</h2>
+      <div className="bg-white rounded-xl p-3 shadow-md mx-auto w-full max-w-4xl flex flex-col gap-4">
+        <div className="mx-auto">
+          <h2 className="capitalize">{name}</h2>
+          <p>{gamesPlayed} games played</p>
+        </div>
 
         <h3>Top Stats</h3>
-        <div className="flex gap-4 capitalize">
+        <div className="flex gap-4 sm:flex-row flex-col">
           {Object.entries(records as object)
             .filter(([_stat, { value }]) => value > 0)
             .map(([label, { player_class, value }]) => (
               <div key={label} className="flex-1">
-                <h4>{label}</h4>
-                <div className="capitalize rounded-xl p-2 border border-gray-200">
-                  <p>{player_class}</p>
+                <h4 className="capitalize">{label}</h4>
+                <div className="rounded-xl p-2 border border-gray-200 grid grid-cols-2">
+                  <p className="capitalize">{player_class}</p>
                   <p>{value}</p>
                 </div>
               </div>
@@ -35,32 +37,43 @@ const Page = ({ averages, records, globalAverages }) => {
         </div>
         <h3>Averages</h3>
         <div className="flex gap-4 capitalize flex-col">
-          {Object.entries(averages).map(([label, data]) => (
-            <div key={label} className="flex-1 flex flex-col gap-4">
-              <div className="flex gap-4 items-center">
-                {icons[label]}
-                <h5>{label}</h5>
+          {playerAvg.map((data: PlayerStats) => (
+            <div
+              key={data.player_class + "average"}
+              className="flex-1 flex flex-col gap-4"
+            >
+              <div className="flex gap-4 flex-row">
+                {icons[data.player_class]}
+                <h5>{data.player_class}</h5>
               </div>
-              <div className="flex flex-row gap-4">
+              <div className="grid sm:grid-cols-2 gap-4">
                 {Object.entries(data)
-                  .filter(([_stat, { value }]) => value > 0)
-                  .map(([stat, { value }]) => (
+                  .filter(
+                    (entry) =>
+                      parseInt(entry[1]) > 0 &&
+                      entry[0] !== "player_class" &&
+                      !entry[0].startsWith("global")
+                  )
+                  .map(([stat, value]) => (
                     <div
-                      key={"avg" + label + stat}
-                      className="capitalize rounded-xl p-2 border border-gray-200 flex-1"
+                      key={"avg" + data.player_class + stat}
+                      className="capitalize rounded-xl p-2 border border-gray-200 flex-1 grid grid-cols-3"
                     >
                       <p>{stat}</p>
                       <p>{Math.round(value).toLocaleString("en")}</p>
-                      <p>
-                        {(
-                          (value / globalAverages[label][stat]) * 100 -
-                          100
-                        ).toFixed(2)}
-                        %{" "}
-                        {(value / globalAverages[label][stat]) * 100 - 100 > 0
-                          ? "higher"
-                          : "lower"}{" "}
-                        than average
+                      <p
+                        className={`text-white mx-auto w-max rounded-full px-2 sm:px-4 ${
+                          (value / data[`global_${stat}`]) * 100 - 100 > 0
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        }`}
+                      >
+                        {(value / data[`global_${stat}`]) * 100 - 100 > 0 &&
+                          "+"}
+                        {((value / data[`global_${stat}`]) * 100 - 100).toFixed(
+                          2
+                        )}
+                        %
                       </p>
                     </div>
                   ))}
@@ -74,62 +87,21 @@ const Page = ({ averages, records, globalAverages }) => {
 };
 
 export const getServerSideProps = async (context: NextPageContext) => {
-  const {
-    query: { name }
-  } = context;
+  const { query } = context;
+
+  const name = (query.name as string).toLowerCase().replace(/[^0-9a-z_]/g, "");
 
   const client = getPgClient();
   await client.connect();
 
-  const playerData = await client.query(
-    "select * from stats where player_name = $1",
-    [name]
-  );
-
-  const averages = {};
   const records = {};
-  const globalAverages = {
-    assault: {},
-    medic: {},
-    recon: {},
-    robo: {}
-  };
-
-  const averageDamage = await client.query(
-    "select player_name,player_class,avg(damage) as value from stats where player_name = $1 group by player_name,player_class order by avg(damage) desc",
+  const globalAvg = await client.query(
+    `select player_class,avg(kills) as global_kills,avg(healing) as global_healing,avg(deaths) as global_deaths,avg(damage) as global_damage, avg(defense) as global_defense from stats group by player_class`
+  );
+  const playerAvg = await client.query(
+    `select player_class,avg(kills) as kills,avg(healing) as healing,avg(deaths) as deaths,avg(damage) as damage, avg(defense) as defense from stats where player_name=$1 group by player_class`,
     [name]
   );
-
-  averageDamage.rows.forEach((row) => {
-    if (!averages[row.player_class]) averages[row.player_class] = {};
-    averages[row.player_class]["damage"] = row;
-  });
-
-  const averageHealing = await client.query(
-    "select player_name,player_class,avg(healing) as value from stats where player_name = $1 group by player_name,player_class order by avg(healing) desc",
-    [name]
-  );
-  averageHealing.rows.forEach((row) => {
-    if (!averages[row.player_class]) averages[row.player_class] = {};
-    averages[row.player_class]["healing"] = row;
-  });
-  const playerAverageKills = await client.query(
-    "select player_name,player_class,avg(kills) as value from stats where player_name = $1 group by player_name,player_class order by avg(kills) desc",
-    [name]
-  );
-  playerAverageKills.rows.forEach((row) => {
-    if (!averages[row.player_class]) averages[row.player_class] = {};
-    averages[row.player_class]["kills"] = row;
-  });
-
-  Object.keys(globalAverages).forEach((e) => {
-    ["kills", "damage", "healing"].forEach(async (stat) => {
-      const globalAvg = await client.query(
-        `select player_class,avg(${stat}) as value from stats where player_class = '${e}' group by player_class`
-      );
-      globalAverages[e][stat] = globalAvg.rows[0].value;
-    });
-  });
 
   const maxKills = await client.query(
     "select player_name,player_class,max(kills) as value from stats where player_name = $1 group by player_name,player_class order by max(kills) desc limit 1",
@@ -144,6 +116,16 @@ export const getServerSideProps = async (context: NextPageContext) => {
     [name]
   );
 
+  const gamesPlayed = await client.query(
+    "select count(*) as value from stats where player_name = $1",
+    [name]
+  );
+
+  // const matchHistory = await client.query(
+  //   "select timestamp,player_name,player_class from stats where player_name = $1 order by timestamp desc",
+  //   [name]
+  // );
+
   records["kills"] = maxKills.rows.at(0);
   records["damage"] = maxDamage.rows.at(0);
   records["healing"] = maxHealing.rows.at(0);
@@ -151,13 +133,15 @@ export const getServerSideProps = async (context: NextPageContext) => {
   await client.end();
   return {
     props: {
-      data: playerData.rows.map((e) => ({
-        ...e,
-        timestamp: new Date(e.timestamp).toJSON()
-      })),
-      averages,
       records,
-      globalAverages
+      gamesPlayed: gamesPlayed.rows[0].value,
+      name,
+      playerAvg: playerAvg.rows.map((e: PlayerStats) => ({
+        ...e,
+        ...globalAvg.rows.find(
+          (global: PlayerStats) => global.player_class === e.player_class
+        )
+      }))
     }
   };
 };

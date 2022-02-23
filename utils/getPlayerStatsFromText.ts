@@ -56,7 +56,7 @@ const getPlayerStatsFromText = (
 
         classCount++;
 
-        if (classCount === num * 2) {
+        if (classCount === num) {
           classCount = 0;
           classIdx++;
         }

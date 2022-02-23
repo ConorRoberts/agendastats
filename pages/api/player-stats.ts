@@ -18,7 +18,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         `insert into stats (match_id,player_name,player_agency,player_class,kills,bot_kills,damage,absorbed,deaths,healing,assists,buffs,obj_pts,defense,timestamp) values ${data
           .map(
             (e) =>
-              `('${matchId}','${matchType}','${e.player_name}','${
+              `('${matchId}','${e.player_name}','${
                 e.player_agency
               }','${e.player_class}',${e.kills},${e.bot_kills},${e.damage},${
                 e.absorbed
