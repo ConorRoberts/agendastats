@@ -16,9 +16,9 @@ const Page = ({ records, name, gamesPlayed, playerAvg }) => {
   return (
     <div>
       <div className="bg-white rounded-xl p-3 shadow-md mx-auto w-full max-w-4xl flex flex-col gap-4">
-        <div className="mx-auto">
+        <div className="mx-auto text-center">
           <h2 className="capitalize">{name}</h2>
-          <p>{gamesPlayed} games played</p>
+          <p>{gamesPlayed} game(s) played</p>
         </div>
 
         <h3>Top Stats</h3>

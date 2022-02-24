@@ -1,42 +1,41 @@
 import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: "default" | "blank" | "filled" | "gray";
-    error?: boolean;
+  variant?: "default" | "blank" | "filled" | "ghost";
+  error?: boolean;
 }
 
 const overrides = "focus:ring-0 focus:outline-none appearance-none";
 
-const styles: any = {
+const styles: { [key: string]: { [key: string]: string } } = {
   default: {
-    style: "text-white bg-indigo-500 rounded-full py-1 px-6 hover:bg-indigo-400 transition",
+    style:
+      "text-white bg-indigo-500 rounded-full py-1 px-6 hover:filter hover:brightness-90 transition",
     error: "border border-red-500 flex items-center gap-2 justify-center",
     disabled: "filter brightness-50"
   },
-  gray: {
-    style: "text-white bg-gray-800 rounded-md py-1.5 px-6 hover:bg-gray-700 transition",
+  ghost: {
+    style:
+      "text-white bg-white-500 rounded-full py-1 px-6 hover:filter hover:brightness-90 transition",
     error: "border border-red-500 flex items-center gap-2 justify-center",
     disabled: "filter brightness-50"
   },
   blank: {
     style: "",
-    error: "",
-  },
+    error: ""
+  }
 };
 
 const Button = (props: ButtonProps) => {
-
   const { variant = "default" } = props;
-  const className = `${props.className} ${overrides} ${styles[variant].style} ${props?.error && styles[variant].error} ${props?.disabled && styles[variant].disabled}`;
+  const className = `${props.className} ${overrides} ${styles[variant].style} ${
+    props?.error && styles[variant].error
+  } ${props?.disabled && styles[variant].disabled}`;
   return (
-    <button
-      {...props}
-      className={className}
-      type={props.type ?? "button"}
-    >
+    <button {...props} className={className} type={props.type ?? "button"}>
       {props.children}
     </button>
   );
 };
 
-export default Button; 
+export default Button;

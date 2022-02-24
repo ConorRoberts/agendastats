@@ -37,8 +37,8 @@ const StatsForm = () => {
     let adjustedValue = value;
     if (value < 0) {
       adjustedValue = 0;
-    } else if (value > 10) {
-      adjustedValue = 10;
+    } else if (value > 20) {
+      adjustedValue = 20;
     }
 
     setCounts({ ...counts, [label]: adjustedValue });

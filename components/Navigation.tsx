@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Drawer, Modal, Button } from "@components/form";
-import { Home, Menu, Login, Logout } from "@components/Icons";
+import { Home, Menu, Login, Logout, Search } from "@components/Icons";
 import useAuth from "hooks/useAuth";
 import { useRouter } from "next/router";
 import StatsForm from "./StatsForm";
@@ -12,7 +12,7 @@ const Navigation = () => {
   const [showStatsForm, setShowStatsForm] = useState(false);
   const [auth] = useAuth();
   const router = useRouter();
-  const [role, roleLoading] = useRole();
+  const [role] = useRole();
 
   useEffect(() => {
     setMenuOpen(false);
@@ -59,6 +59,11 @@ const Navigation = () => {
               <Home className="small-screen-nav-button-icon" />
             </div>
           </Link>
+          <Link href="/search" passHref>
+            <div className="small-screen-nav-button">
+              <Search className="small-screen-nav-button-icon" />
+            </div>
+          </Link>
           <div className="small-screen-nav-button">
             <Menu
               className="small-screen-nav-button-icon"
@@ -77,6 +82,11 @@ const Navigation = () => {
         <Link href="/" passHref>
           <div className="big-screen-nav-button">
             <p>Home</p>
+          </div>
+        </Link>
+        <Link href="/search" passHref>
+          <div className="big-screen-nav-button">
+            <p>Player Search</p>
           </div>
         </Link>
         {/* <Link href="/games" passHref>

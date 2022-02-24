@@ -18,8 +18,8 @@ const MyApp = ({ Component, pageProps }) => {
           name="viewport"
           content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"
         />
-        <meta name="description" content="Description" />
-        <meta name="keywords" content="Keywords" />
+        <meta name="description" content="Tracking Global Agenda statistics since 2022." />
+        <meta name="keywords" content="Global Agenda, Agendastats, Gaming" />
         <title>{APP_NAME}</title>
 
         <link rel="manifest" href="/manifest.json" />
@@ -36,7 +36,7 @@ const MyApp = ({ Component, pageProps }) => {
           sizes="32x32"
         />
         <link rel="apple-touch-icon" href="/apple-icon.png"></link>
-        <meta name="theme-color" content="#fcfcfc" />
+        <meta name="theme-color" content="#ffffff" />
       </Head>
       <div className="bg-gray-100 dark:bg-gray-900 text-black dark:text-white min-h-screen md:pt-24 pb-24 md:pb-0 relative flex flex-col" id="app">
         <StateManager />
