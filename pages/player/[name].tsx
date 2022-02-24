@@ -2,8 +2,6 @@ import { Assault, Medic, Recon, Robotics } from "@components/Icons";
 import PlayerStats from "@typedefs/PlayerStats";
 import getPgClient from "@utils/getPgClient";
 import { NextPageContext } from "next";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
 
 const icons = {
   robo: <Robotics className="w-5 h-5" />,
