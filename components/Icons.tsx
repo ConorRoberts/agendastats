@@ -8,7 +8,8 @@ export {
   AiOutlineUnorderedList as List,
   AiOutlineApi as API,
   AiOutlinePlusCircle as Plus,
-  AiOutlineMinusCircle as Minus
+  AiOutlineMinusCircle as Minus,
+  AiOutlineQuestionCircle as Question
 } from "react-icons/ai";
 export {
   GiHamburgerMenu as Menu,
