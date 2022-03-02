@@ -1,5 +1,5 @@
 import ClassIcon from "@components/ClassIcon";
-import { Select, Tooltip } from "@components/form";
+import { Select } from "@components/form";
 import { MIN_GAMES_PLAYED } from "@config/config";
 import PlayerStats from "@typedefs/PlayerStats";
 import getPgClient from "@utils/getPgClient";
@@ -147,27 +147,6 @@ const Page = ({ averages, topPlayers, contributionScores }: PageProps) => {
             </div>
           ))}
       </div>
-      {/* {singleMatchRecords.map(([label, data]) => (
-            <div key={label} className="flex flex-col gap-4">
-              <h4>{label}</h4>
-              <div className="grid gap-4 grid-cols-3">
-                {data.map(({ player_name, player_class, value }) => (
-                  <div
-                    key={label + player_name}
-                    className="rounded-md p-2 border border-gray-300 capitalize grid grid-cols-2"
-                  >
-                    <div className="flex gap-4 items-center">
-                      {icons[player_class]}
-                      <p>{player_name}</p>
-                    </div>
-                    <p className="text-center my-auto">
-                      {Math.round(value).toLocaleString("en")}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))} */}
     </div>
   );
 };
@@ -176,17 +155,20 @@ export const getServerSideProps = async () => {
   const client = getPgClient();
   await client.connect();
   const highestAverageDmg = await client.query(
-    "select A.player_name,A.player_class,A.damage as value from (select player_name,player_class,avg(damage) as damage,count(*) from stats group by player_name,player_class having count(*)>3) as A order by damage desc limit 3;"
+    "select A.player_name,A.player_class,A.damage as value from (select player_name,player_class,avg(damage) as damage,count(*) from stats group by player_name,player_class having count(*)>=$1) as A order by damage desc limit 3;",
+    [MIN_GAMES_PLAYED]
   );
   const highestAverageKills = await client.query(
-    "select A.player_name,A.player_class,A.kills as value from (select player_name,player_class,avg(kills) as kills,count(*) from stats group by player_name,player_class having count(*)>3) as A order by kills desc limit 3;"
+    "select A.player_name,A.player_class,A.kills as value from (select player_name,player_class,avg(kills) as kills,count(*) from stats group by player_name,player_class having count(*)>=$1) as A order by kills desc limit 3;",
+    [MIN_GAMES_PLAYED]
   );
   const highestAverageHealing = await client.query(
-    "select A.player_name,A.player_class,A.healing as value from (select player_name,player_class,avg(healing) as healing,count(*) from stats group by player_name,player_class having count(*)>3) as A order by healing desc limit 3;"
+    "select A.player_name,A.player_class,A.healing as value from (select player_name,player_class,avg(healing) as healing,count(*) from stats group by player_name,player_class having count(*)>=$1) as A order by healing desc limit 3;",
+    [MIN_GAMES_PLAYED]
   );
-  const singleMatchHealing = await client.query(
-    "select player_name,player_class,max(healing) as value from stats group by match_id,player_name,player_class order by avg(healing) desc limit 3"
-  );
+  // const singleMatchHealing = await client.query(
+  //   "select player_name,player_class,max(healing) as value from stats group by match_id,player_name,player_class order by avg(healing) desc limit 3"
+  // );
 
   const topPlayers =
     await client.query(`SELECT A.player_name,A.player_class,(100-AVG((KILLS+DAMAGE+bot_kills+ABSORBED+HEALING+ASSISTS+BUFFS+obj_pts+DEFENSE)/7.5)) as rank FROM (select player_name,player_class,rank() OVER (PARTITION BY player_CLASS order by sum(KILLS) DESC) KILLS,
@@ -208,7 +190,6 @@ export const getServerSideProps = async () => {
         ["Average Kills", highestAverageKills.rows],
         ["Average Healing", highestAverageHealing.rows]
       ],
-      singleMatchRecords: [["Single Match Healing", singleMatchHealing.rows]],
       topPlayers: topPlayers.rows
         .map((e) => ({
           ...e,

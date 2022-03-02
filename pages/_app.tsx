@@ -24,18 +24,18 @@ const MyApp = ({ Component, pageProps }) => {
 
         <link rel="manifest" href="/manifest.json" />
         <link
-          href="/icons/favicon-16x16.png"
+          href="/icons/icon-16x16.png"
           rel="icon"
           type="image/png"
           sizes="16x16"
         />
         <link
-          href="/icons/favicon-32x32.png"
+          href="/icons/icon-32x32.png"
           rel="icon"
           type="image/png"
           sizes="32x32"
         />
-        <link rel="apple-touch-icon" href="/apple-icon.png"></link>
+        <link rel="apple-touch-icon" href="/icons/icon-96x96.png"></link>
         <meta name="theme-color" content="#ffffff" />
       </Head>
       <div className="bg-gray-100 dark:bg-gray-900 text-black dark:text-white min-h-screen md:pt-24 pb-24 md:pb-0 relative flex flex-col" id="app">

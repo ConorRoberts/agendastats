@@ -1,7 +1,7 @@
 interface PlayerStats {
   player_name: string;
-  player_agency?: string;
-  player_class?: "assault" | "medic" | "recon" | "robo";
+  player_agency: string;
+  player_class: "assault" | "medic" | "recon" | "robo";
   kills: number;
   absorbed: number;
   healing: number;
@@ -13,7 +13,8 @@ interface PlayerStats {
   deaths: number;
   assists: number;
   timestamp: string;
-  match_id?: string;
+  match_id: string;
+  player_team: "blue" | "red";
 }
 
 export default PlayerStats;

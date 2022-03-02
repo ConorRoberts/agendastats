@@ -1,24 +1,23 @@
+import PlayerStats from "@typedefs/PlayerStats";
 import getPgClient from "@utils/getPgClient";
-import getPlayerStatsFromText from "@utils/getPlayerStatsFromText";
 import { randomUUID } from "crypto";
 import { NextApiRequest, NextApiResponse } from "next";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { method, body } = req;
-  const { text, classCounts, matchType } = body;
+  const { data, matchType } = body;
   try {
     if (method === "POST") {
-      const data = getPlayerStatsFromText(text, classCounts);
 
       const client = getPgClient();
 
       await client.connect();
       const matchId = randomUUID();
       await client.query(
-        `insert into stats (match_id,player_name,player_agency,player_class,kills,bot_kills,damage,absorbed,deaths,healing,assists,buffs,obj_pts,defense,timestamp) values ${data
+        `insert into stats (match_id,player_team,player_name,player_agency,player_class,kills,bot_kills,damage,absorbed,deaths,healing,assists,buffs,obj_pts,defense,timestamp) values ${data
           .map(
-            (e) =>
-              `('${matchId}','${e.player_name}','${
+            (e:PlayerStats) =>
+              `('${matchId}','${e.player_team}','${e.player_name}','${
                 e.player_agency
               }','${e.player_class}',${e.kills},${e.bot_kills},${e.damage},${
                 e.absorbed
