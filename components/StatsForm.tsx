@@ -1,27 +1,24 @@
-import { Button, TextArea, Select } from "@components/form";
-import PlayerStats from "@typedefs/PlayerStats";
+import { Button, Select, Input } from "@components/form";
 import axios from "axios";
 import { useState } from "react";
 import { Loading } from "./Icons";
 
 const StatsForm = () => {
-  const [text, setText] = useState("");
-
   const [matchType, setMatchType] = useState("challenge");
+  const [imageUrl, setImageUrl] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
 
   const handleSubmit = async () => {
     setSubmitLoading(true);
 
     try {
+      if (imageUrl === "") return;
       await axios.post("/api/player-stats", {
-        data: JSON.parse(text).map((e:PlayerStats) => ({
-          ...e,
-          timestamp: new Date().toLocaleDateString()
-        })),
+        imageUrl,
         matchType
       });
-      setText("");
+
+      setImageUrl("");
     } catch (error) {
       console.error(error);
     }
@@ -31,25 +28,22 @@ const StatsForm = () => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="h-[800px] overflow-y-auto gap-4">
-        <TextArea
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Stats"
-          value={text}
-        />
-      </div>
-      <div className="flex flex-col gap-8 mx-auto w-full max-w-lg">
-        <div className="flex flex-col gap-2">
-          <p className="font-semibold">Match Type</p>
-          <Select
-            onChange={(e) => setMatchType(e.target.value)}
-            value={matchType}
-          >
-            {["challenge", "mercenary", "ava"].map((e) => (
-              <option key={e}>{e}</option>
-            ))}
-          </Select>
-        </div>
+      <Input
+        onChange={(e) => setImageUrl(e.target.value)}
+        placeholder="Image URL"
+        value={imageUrl}
+      />
+      <div className="flex flex-col gap-2">
+        <p className="font-semibold">Match Type</p>
+        <Select
+          onChange={(e) => setMatchType(e.target.value)}
+          value={matchType}
+        >
+          <option defaultChecked>None</option>
+          {["challenge", "mercenary", "ava"].map((e) => (
+            <option key={e}>{e}</option>
+          ))}
+        </Select>
       </div>
       <div className="mx-auto mt-4">
         <Button type="submit" onClick={handleSubmit}>

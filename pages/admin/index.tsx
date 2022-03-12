@@ -1,24 +1,17 @@
 import getPgClient from "@utils/getPgClient";
 import _ from "lodash";
 import JoinedMatchStats from "@typedefs/JoinedMatchStats";
-import useRole from "@hooks/useRole";
-import LoadingScreen from "@components/LoadingScreen";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 
 const Page = ({ matches }) => {
-  const [role, loading] = useRole();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
-      if (role !== "admin") {
-        router.push("/");
-      }
+    if (process.env.NODE_ENV !== "development") {
+      router.push("/");
     }
   }, []);
-
-  if (loading) return <LoadingScreen />;
 
   return (
     <div>

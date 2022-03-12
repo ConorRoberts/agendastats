@@ -109,10 +109,10 @@ export const getServerSideProps = async (context: NextPageContext) => {
 
   const records = {};
   const globalAvg = await client.query(
-    `select player_class,avg(kills) as global_kills,avg(healing) as global_healing,avg(deaths) as global_deaths,avg(damage) as global_damage, avg(defense) as global_defense from stats group by player_class`
+    `select player_class,avg(kills) as global_kills,avg(healing) as global_healing,avg(deaths) as global_deaths,avg(damage) as global_damage, avg(defense) as global_defense, avg(assists) as global_assists from stats group by player_class`
   );
   const playerAvg = await client.query(
-    `select player_class,avg(kills) as kills,avg(healing) as healing,avg(deaths) as deaths,avg(damage) as damage, avg(defense) as defense from stats where player_name=$1 group by player_class`,
+    `select player_class,avg(kills) as kills,avg(healing) as healing,avg(deaths) as deaths,avg(damage) as damage, avg(defense) as defense, avg(assists) as assists from stats where player_name=$1 group by player_class`,
     [name]
   );
 
