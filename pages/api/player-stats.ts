@@ -1,32 +1,39 @@
+import PlayerStats from "@typedefs/PlayerStats";
 import getPgClient from "@utils/getPgClient";
-import getPlayerStatsFromText from "@utils/getPlayerStatsFromText";
-import { randomUUID } from "crypto";
+import axios from "axios";
 import { NextApiRequest, NextApiResponse } from "next";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { method, body } = req;
-  const { text, classCounts, matchType } = body;
+  const { matchType, imageUrl } = body;
   try {
     if (method === "POST") {
-      const data = getPlayerStatsFromText(text, classCounts);
-
       const client = getPgClient();
 
+      const { data } = await axios.post(
+        "https://ocr-gplqjog2wq-uc.a.run.app/",
+        { image_url: imageUrl }
+      );
+
+      console.log(data);
+
+      const matchId = data[0].match_id;
+
       await client.connect();
-      const matchId = randomUUID();
+
       await client.query(
-        `insert into stats (match_id,player_name,player_agency,player_class,kills,bot_kills,damage,absorbed,deaths,healing,assists,buffs,obj_pts,defense,timestamp) values ${data
+        `insert into stats (match_id,player_team,player_name,player_class,kills,bot_kills,damage,absorbed,deaths,healing,assists,buffs,obj_pts,defense,timestamp) values ${data
           .map(
-            (e) =>
-              `('${matchId}','${e.player_name}','${
-                e.player_agency
-              }','${e.player_class}',${e.kills},${e.bot_kills},${e.damage},${
-                e.absorbed
-              },${e.deaths},${e.healing},${e.assists},${e.buffs},${e.obj_pts},${
+            (e: PlayerStats) =>
+              `('${e.match_id}','${e.player_team}','${e.player_name}','${
+                e.player_class
+              }',${e.kills},${e.bot_kills},${e.damage ?? (e as any).Omg},${e.absorbed},${
+                e.deaths
+              },${e.healing},${e.assists},${e.buffs},${e.obj_pts},${
                 e.defense
-              },'${new Date(e.timestamp).toLocaleDateString()}')`
+              },'${new Date().toLocaleDateString()}')`
           )
-          .join(",")}`
+          .join(",")};`
       );
 
       await client.query(

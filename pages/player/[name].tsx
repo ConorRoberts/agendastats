@@ -2,8 +2,6 @@ import { Assault, Medic, Recon, Robotics } from "@components/Icons";
 import PlayerStats from "@typedefs/PlayerStats";
 import getPgClient from "@utils/getPgClient";
 import { NextPageContext } from "next";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
 
 const icons = {
   robo: <Robotics className="w-5 h-5" />,
@@ -12,13 +10,26 @@ const icons = {
   recon: <Recon className="w-5 h-5" />
 };
 
-const Page = ({ records, name, gamesPlayed, playerAvg }) => {
+interface PageProps {
+  name: string;
+  records: PlayerStats[];
+  gamesPlayed: { [className: string]: number };
+  playerAvg: object[];
+}
+
+const Page = ({ records, name, gamesPlayed, playerAvg }: PageProps) => {
   return (
     <div>
       <div className="bg-white rounded-xl p-3 shadow-md mx-auto w-full max-w-4xl flex flex-col gap-4">
         <div className="mx-auto text-center">
           <h2 className="capitalize">{name}</h2>
-          <p>{gamesPlayed} game(s) played</p>
+          <p>
+            {Object.values(gamesPlayed).reduce(
+              (a: number, b: number) => a + b,
+              0
+            )}{" "}
+            game(s) played
+          </p>
         </div>
 
         <h3>Top Stats</h3>
@@ -36,15 +47,16 @@ const Page = ({ records, name, gamesPlayed, playerAvg }) => {
             ))}
         </div>
         <h3>Averages</h3>
-        <div className="flex gap-4 capitalize flex-col">
+        <div className="flex gap-4 flex-col">
           {playerAvg.map((data: PlayerStats) => (
             <div
               key={data.player_class + "average"}
               className="flex-1 flex flex-col gap-4"
             >
-              <div className="flex gap-4 flex-row">
+              <div className="flex gap-4 flex-row items-center">
                 {icons[data.player_class]}
-                <h5>{data.player_class}</h5>
+                <h5 className="capitalize">{data.player_class}</h5>
+                <p>{gamesPlayed[data.player_class]} game(s)</p>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 {Object.entries(data)
@@ -90,16 +102,17 @@ export const getServerSideProps = async (context: NextPageContext) => {
   const { query } = context;
 
   const name = (query.name as string).toLowerCase().replace(/[^0-9a-z_]/g, "");
+  const classes = ["assault", "medic", "recon", "robo"];
 
   const client = getPgClient();
   await client.connect();
 
   const records = {};
   const globalAvg = await client.query(
-    `select player_class,avg(kills) as global_kills,avg(healing) as global_healing,avg(deaths) as global_deaths,avg(damage) as global_damage, avg(defense) as global_defense from stats group by player_class`
+    `select player_class,avg(kills) as global_kills,avg(healing) as global_healing,avg(deaths) as global_deaths,avg(damage) as global_damage, avg(defense) as global_defense, avg(assists) as global_assists from stats group by player_class`
   );
   const playerAvg = await client.query(
-    `select player_class,avg(kills) as kills,avg(healing) as healing,avg(deaths) as deaths,avg(damage) as damage, avg(defense) as defense from stats where player_name=$1 group by player_class`,
+    `select player_class,avg(kills) as kills,avg(healing) as healing,avg(deaths) as deaths,avg(damage) as damage, avg(defense) as defense, avg(assists) as assists from stats where player_name=$1 group by player_class`,
     [name]
   );
 
@@ -116,8 +129,15 @@ export const getServerSideProps = async (context: NextPageContext) => {
     [name]
   );
 
-  const gamesPlayed = await client.query(
-    "select count(*) as value from stats where player_name = $1",
+  const matchesPlayed = await client.query(
+    `${classes
+      .map(
+        (className) =>
+          `
+          select count(*) as value from stats where player_name = $1 and player_class='${className}'
+        `
+      )
+      .join(" union all ")}`,
     [name]
   );
 
@@ -134,7 +154,12 @@ export const getServerSideProps = async (context: NextPageContext) => {
   return {
     props: {
       records,
-      gamesPlayed: gamesPlayed.rows[0].value,
+      gamesPlayed: Object.fromEntries(
+        matchesPlayed.rows.map((e, index) => [
+          classes[index],
+          parseInt(e.value)
+        ])
+      ),
       name,
       playerAvg: playerAvg.rows.map((e: PlayerStats) => ({
         ...e,
